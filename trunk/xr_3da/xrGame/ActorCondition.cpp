@@ -236,21 +236,21 @@ void CActorCondition::ConditionJump(float weight)
 {
 	float power			=	m_fJumpPower;
 	power				+=	m_fJumpWeightPower*weight*(weight>1.f?m_fOverweightJumpK:1.f);
-	m_fPower			-=	HitPowerEffect(power);
+	//m_fPower			-=	HitPowerEffect(power);
 }
 void CActorCondition::ConditionWalk(float weight, bool accel, bool sprint)
 {	
 	float power			=	m_fWalkPower;
 	power				+=	m_fWalkWeightPower*weight*(weight>1.f?m_fOverweightWalkK:1.f);
 	power				*=	m_fDeltaTime*(accel?(sprint?m_fSprintK:m_fAccelK):1.f);
-	m_fPower			-=	HitPowerEffect(power);
+	//m_fPower			-=	HitPowerEffect(power);
 }
 
 void CActorCondition::ConditionStand(float weight)
 {	
 	float power			= m_fStandPower;
 	power				*= m_fDeltaTime;
-	m_fPower			-= power;
+	//m_fPower			-= power;
 }
 
 
@@ -260,7 +260,7 @@ bool CActorCondition::IsCantWalk() const
 		m_bCantWalk		= true;
 	else if(m_fPower > m_fCantWalkPowerEnd)
 		m_bCantWalk		= false;
-	return				m_bCantWalk;
+	return				false;
 }
 
 #include "CustomOutfit.h"
@@ -283,11 +283,11 @@ bool CActorCondition::IsCantWalkWeight()
 
 bool CActorCondition::IsCantSprint() const
 {
-	if(m_fPower< m_fCantSprintPowerBegin)
-		m_bCantSprint	= true;
-	else if(m_fPower > m_fCantSprintPowerEnd)
-		m_bCantSprint	= false;
-	return				m_bCantSprint;
+	//if(m_fPower< m_fCantSprintPowerBegin)
+		//m_bCantSprint	= true;
+	//else if(m_fPower > m_fCantSprintPowerEnd)
+		//m_bCantSprint	= false;
+	return				false;
 }
 
 bool CActorCondition::IsLimping() const
