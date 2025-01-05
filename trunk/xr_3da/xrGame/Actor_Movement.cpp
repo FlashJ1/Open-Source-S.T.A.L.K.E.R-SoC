@@ -16,6 +16,7 @@
 #include "actorcondition.h"
 #include "game_cl_base.h"
 #include "WeaponMagazined.h"
+#include "PHMovementControl.h"
 #include "CharacterPhysicsSupport.h"
 #ifdef DEBUG
 #include "phdebug.h"
@@ -52,11 +53,14 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 	// закончить приземление
 	if (mstate_real&(mcLanding|mcLanding2)){
 		m_fLandingTime		-= dt;
-		if (m_fLandingTime<=0.f){
-			mstate_real		&=~	(mcLanding|mcLanding2);
-			mstate_real		&=~	(mcFall|mcJump);
-		}
+		//if (m_fLandingTime<=0.f){
+			//mstate_real		&=~	(mcLanding|mcLanding2);
+			//mstate_real		&=~	(mcFall|mcJump);
+		//}
 	}
+
+
+
 	// закончить падение
 	if (character_physics_support()->movement()->gcontact_Was){
 		if (mstate_real&mcFall){
@@ -172,10 +176,10 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 	}
 
 	// update player accel
-	if (mstate_wf&mcFwd)		vControlAccel.z +=  1;
-	if (mstate_wf&mcBack)		vControlAccel.z += -1;
-	if (mstate_wf&mcLStrafe)	vControlAccel.x += -1;
-	if (mstate_wf&mcRStrafe)	vControlAccel.x +=  1;
+	if (mstate_wf&mcFwd)		vControlAccel.z =  160;
+	if (mstate_wf&mcBack)		vControlAccel.z = -160;
+	if (mstate_wf&mcLStrafe)	vControlAccel.x = -160;
+	if (mstate_wf&mcRStrafe)	vControlAccel.x = 160;
 
 
 	if (character_physics_support()->movement()->Environment()==CPHMovementControl::peOnGround || character_physics_support()->movement()->Environment()==CPHMovementControl::peAtWall )
@@ -521,27 +525,32 @@ bool	isActorAccelerated			(u32 mstate, bool ZoomMode)
 
 }
 
-void SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspeed, float frametime) {
+void SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspeed, float frametime)
+{
+	const float sv_maxairspeed = 30.0f;
 	const int sv_accelerate = 10;
-	float addspeed, wishspd, accelspeed, currentspeed;
-	wishspd = wishveloc.magnitude();
 
-	if (wishspd > 30.0f)
-		wishspd = 30.0f;
-	currentspeed = velocity.dotproduct(wishveloc);
-	addspeed = wishspd - currentspeed;
+	float wishspd = wishveloc.magnitude();
+	if (wishspd > sv_maxairspeed)
+		wishspd = sv_maxairspeed;
+
+	float currentspeed = velocity.dotproduct(wishveloc);
+	float addspeed = wishspd - currentspeed;
 
 	if (addspeed <= 0)
 		return;
 
-	accelspeed = sv_accelerate * wishspeed * frametime;
+	float accelspeed = sv_accelerate * wishspeed * frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
 	velocity.x += accelspeed * wishveloc.x;
 	velocity.y += accelspeed * wishveloc.y;
 	velocity.z += accelspeed * wishveloc.z;
+
+
 }
+
 
 
 
