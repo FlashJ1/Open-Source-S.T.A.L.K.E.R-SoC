@@ -155,6 +155,8 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 
 	if (!(mstate_real&mcFall) && (character_physics_support()->movement()->Environment()==CPHMovementControl::peInAir)) 
 	{
+		SV_AirAccelerate(vControlAccel, vControlAccel, dt);
+		SV_AirMove(vControlAccel);
 		m_fFallTime				-=	dt;
 		if (m_fFallTime<=0.f){
 			m_fFallTime			=	s_fFallTime;
@@ -525,7 +527,9 @@ bool	isActorAccelerated			(u32 mstate, bool ZoomMode)
 
 }
 
-void SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspeed, float frametime)
+
+
+void CActor::SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspeed)
 {
 	const float sv_maxairspeed = 30.0f;
 	const int sv_accelerate = 10;
@@ -540,7 +544,7 @@ void SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspe
 	if (addspeed <= 0)
 		return;
 
-	float accelspeed = sv_accelerate * wishspeed * frametime;
+	float accelspeed = sv_accelerate * wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -551,8 +555,46 @@ void SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspe
 
 }
 
+void CActor::SV_AirMove(Fvector& velocity)
+{
+	Fvector wishvel;
+	float fmove, smove;
+	const float sv_maxairspeed = 30.0f;
+	float wishspd;
 
+	
+	//character_physics_support()->movement()->v_angular_velocity.get(mcFwd, mcRStrafe);
 
+	//fmove = mcFwd;
+	//smove = mcLStrafe && mcRStrafe;
+
+	//wishvel.x = mcFwd.x * fmove + mcRStrafe.x * smove;
+	//wishvel.y = mcFwd.y * fmove + mcRStrafe.y * smove;
+	//wishvel.z = mcFwd.z * fmove + mcRStrafe.z * smove;
+
+	Fvector wishdir;
+	wishdir.set(wishvel);
+	wishspd = wishdir.magnitude();
+	if (wishspd > sv_maxairspeed)
+	{
+		wishvel.mul(sv_maxairspeed / wishspd);
+		wishspd = sv_maxairspeed;
+	}
+
+	if (GodMode())
+	{
+		velocity.set(wishvel);
+	}
+	else if (peOnGround)
+	{
+		//SV_UserFriction();
+		isActorAccelerated;
+	}
+	else
+	{
+		SV_AirAccelerate(wishvel, wishvel, wishspd);
+	}
+}
 
 bool CActor::CanAccelerate			()
 {

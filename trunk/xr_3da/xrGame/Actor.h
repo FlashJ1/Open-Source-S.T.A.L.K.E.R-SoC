@@ -441,6 +441,8 @@ public:
 	bool					CanSprint				();
 	bool					CanRun					();
 	void					StopAnyMove				();
+	void					SV_AirAccelerate(Fvector& velocity, const Fvector& wishveloc, float wishspeed);
+	void					SV_AirMove(Fvector& velocity);
 
 	bool					AnyAction				()	{return (mstate_real & mcAnyAction) != 0;};
 
